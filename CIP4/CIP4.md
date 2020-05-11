@@ -82,7 +82,7 @@ This alphabet satisfies the following requirements:
 
 The last two bytes are compressed to a 4-digit number. For this we will simply take the last 4 digits of the 16-bit integer number constructed from 2 bytes as `((A << 8) + B) % 10000` (zero-padded).
 
-This above produces 10000 unique values across all possible values of A and B and giving maximum of 7 potential collisions per value and 6.5 average collisions per value, which is the minimum, given the fact that we reduce maximum potential number 65025 to 4 digits.
+This above produces 10000 unique values across all possible values of A and B and giving maximum of 7 potential collisions per value and 6.5 average collisions per value, which is the minimum, given the fact that we reduce maximum potential number 65535 to 4 digits.
 **Note**: resulting number is also zero-padded to 4 digits.
 
 ### ImagePart rationale
