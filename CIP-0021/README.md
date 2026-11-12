@@ -53,9 +53,8 @@ Conway introduced optional 258 tags in certain items that are considered sets se
 
 #### Unsupported entries
 
-The following transaction body entries must not be included:
+The following transaction body entry must not be included:
 * `6 : update`
-* `20 : proposal procedures`
 
 #### Integers
 
@@ -76,6 +75,11 @@ The number of the following transaction elements individually must not exceed `U
 - collateral inputs in transaction body
 - required signers in transaction body
 - reference inputs in transaction body
+- proposal procedures in transaction body
+- in a proposal procedure:
+  - withdrawals in a `treasury_withdrawals_action`
+  - members to remove in an `update_committee` action
+  - members to add in an `update_committee` action
 - the total number of witnesses
 
 For voting procedures, it is only allowed to include a single voter with a single voting procedure.
@@ -125,6 +129,7 @@ If a transaction contains a pool registration certificate, then it must not cont
 - total collateral;
 - reference inputs;
 - voting procedures;
+- proposal procedures;
 - treasury value;
 - donation value.
 
@@ -133,6 +138,14 @@ It is allowed to arbitrarily combine other supported certificate types.
 #### Withdrawals
 
 Since withdrawals are represented as a map of reward accounts, withdrawals also need to be sorted in accordance with the specified canonical CBOR format. A transaction must not contain duplicate withdrawals.
+
+#### Proposal procedures
+
+Each proposal procedure in `20 : proposal_procedures` contains one governance action (`gov_action`). The general rules of this CIP apply to all types of governance action. The following types also have their own rules:
+
+- `parameter_change_action`: the protocol parameter update must contain at least one protocol parameter, and it must not contain `18 : cost_models`.
+- `treasury_withdrawals_action`: the map of withdrawals from the treasury (reward account to amount) must be sorted in accordance with the specified canonical CBOR format, and it must not contain duplicate reward accounts.
+- `update_committee`: the map of committee members to add must be sorted in accordance with the specified canonical CBOR format, and it must not contain duplicate credentials.
 
 #### Auxiliary data
 
@@ -158,7 +171,7 @@ The specified canonical CBOR format is consistent with how certain other data ar
 
 #### Credentials
 
-Generally, HW wallets require that any key hash credential (and withdrawal address too) is given by the derivation path of the key (otherwise the user will not be aware that the key belongs to his wallet). This does not apply to Plutus transactions where HW wallets instead aim for maximum flexibility at the cost of users being potentially misled. (It is very hard to foresee how Plutus script authors would use various transaction elements and any restriction applied by HW wallets might break a use case which is otherwise perfectly sound and safe.)
+Generally, HW wallets require that any key hash credential (and withdrawal address too) is given by the derivation path of the key (otherwise the user will not be aware that the key belongs to his wallet). This does not apply to Plutus transactions where HW wallets instead aim for maximum flexibility at the cost of users being potentially misled. (It is very hard to foresee how Plutus script authors would use various transaction elements and any restriction applied by HW wallets might break a use case which is otherwise perfectly sound and safe.) Proposal procedures are also an exception: the deposit return account, the treasury withdrawal recipients and the committee members can belong to third parties, so they can be given as raw values in any signing mode.
 
 When signing a transaction, Ledger and Trezor use a _transaction signing mode_ that describes upfront what the intent is
 (the software wallet is responsible for choosing an appropriate mode). The transaction is then validated according to the mode.
@@ -181,6 +194,14 @@ Combining withdrawals and pool registration certificates isn't allowed because b
 #### Withdrawals
 
 Similarly to multiassets, allowing duplicate withdrawals might lead to inconsistencies between what is displayed to the user and how nodes and other tools might interpret the duplicate keys.
+
+#### Proposal procedures
+
+Cost models are large and they are not readable as text. A HW wallet cannot show them to the user in a form that the user can examine, so it does not sign them.
+
+A parameter change action without protocol parameters has no effect, so it is not allowed.
+
+The maps in a `treasury_withdrawals_action` and an `update_committee` action must be in canonical order for the same reason as the other maps (see [Canonical CBOR serialization format](#canonical-cbor-serialization-format-1)). They must not contain duplicate keys for the same reason as withdrawals (see [Withdrawals](#withdrawals-1)).
 
 #### Auxiliary data
 
@@ -217,6 +238,7 @@ Missing features:
 - signing operational certificates
 - derivation of native script hashes
 - stake pool registration and retirement
+- proposal procedures
 - display of certain details of Byron addresses (though addresses themselves are supported)
 
 #### Trezor
@@ -229,6 +251,7 @@ Missing features:
 - DRep certificates (registration, retirement, update)
 - constitutional committee certificates
 - voting procedures
+- proposal procedures
 - treasury and donation elements of transactions
 
 ## Copyright
