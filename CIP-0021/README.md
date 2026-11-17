@@ -74,7 +74,7 @@ The number of the following transaction elements individually must not exceed `U
 - pool relays in a pool registration certificate
 - withdrawals in transaction body
 - collateral inputs in transaction body
-- required signers in transaction body
+- guards in transaction body
 - reference inputs in transaction body
 - the total number of witnesses
 
@@ -120,7 +120,7 @@ If a transaction contains a pool registration certificate, then it must not cont
 - any output containing datum, datum hash or reference script;
 - script data hash;
 - any collateral input;
-- any required signer;
+- any guard;
 - collateral return output;
 - total collateral;
 - reference inputs;
@@ -145,6 +145,15 @@ In this exceptional case, auxiliary data must be encoded in their "tuple" format
 ```
 
 The `auxiliary_scripts` must be an array of length 0.
+
+#### Guards
+
+Since Dijkstra, `guards` has two possible encodings:
+
+- a set of key hashes: `[addr_keyhash, ...]`
+- an ordered set of credentials: `[[0, addr_keyhash], [1, script_hash], ...]`
+
+Both encodings can have the 258 tag, as described in [Tags in sets](#tags-in-sets). A transaction must use only one of them. Tools must keep the order and the encoding of the guards unchanged.
 
 ## Rationale: How does this CIP achieve its goals?
 
@@ -230,6 +239,7 @@ Missing features:
 - constitutional committee certificates
 - voting procedures
 - treasury and donation elements of transactions
+- guards in the credentials encoding
 
 ## Copyright
 
